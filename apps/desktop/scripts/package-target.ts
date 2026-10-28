@@ -493,7 +493,8 @@ export async function packageTarget(
         { cwd: APP_ROOT, env: electronBuilderEnv, timeoutMs: 60_000 })
     })
   }
-  await execute(invocation.unsigned ? ['run', 'build', '--profile', 'local'] : ['run', 'build:official'], buildEnv, REPOSITORY_ROOT)
+  // Unsigned builds skip the aggregate test and script type checks, which emit nothing the package uses.
+  await execute(invocation.unsigned ? ['run', 'build:artifacts', '--profile', 'local'] : ['run', 'build:official'], buildEnv, REPOSITORY_ROOT)
   let preparationFailure: { error: unknown } | undefined
   const executePreparation = async (args: readonly string[], env: NodeJS.ProcessEnv, cwd?: string): Promise<void> => {
     if (preparationFailure !== undefined) throw preparationFailure.error
