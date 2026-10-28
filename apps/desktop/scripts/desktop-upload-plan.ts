@@ -5,7 +5,7 @@ import { createReadStream } from 'node:fs'
 import { readFile, stat } from 'node:fs/promises'
 import { basename, join, resolve } from 'node:path'
 import { dump, load } from 'js-yaml'
-import type { DesktopPackageTargetName } from './package-target.ts'
+import type { DesktopAutoUpdateTarget as DesktopPackageTargetName } from './desktop-auto-update-environment.mjs'
 import {
   desktopBuildRecordFilename,
   desktopLatestInstallerFilename,

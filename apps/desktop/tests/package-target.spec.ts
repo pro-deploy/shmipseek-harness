@@ -26,7 +26,9 @@ describe('desktop package target', () => {
   })
 
   it('rejects unsupported targets and hosts before building', () => {
-    expect(() => resolveDesktopPackageTarget('linux-x64', 'linux', 'x64')).toThrow(/unsupported target/u)
+    expect(resolveDesktopPackageTarget('linux-x64', 'linux', 'x64')).toMatchObject({ platform: 'linux', builderPlatform: '--linux' })
+    expect(() => resolveDesktopPackageTarget('linux-x64', 'darwin', 'arm64')).toThrow(/Linux x64 build host/u)
+    expect(() => resolveDesktopPackageTarget('linux-arm64', 'linux', 'arm64')).toThrow(/unsupported target/u)
     expect(() => resolveDesktopPackageTarget('win-x64', 'darwin', 'arm64')).toThrow(/Windows x64/u)
     expect(() => resolveDesktopPackageTarget('mac-arm64', 'darwin', 'x64')).toThrow(/Apple Silicon/u)
     expect(() => resolveDesktopPackageTarget('mac-arm64', 'linux', 'arm64')).toThrow(/macOS/u)
@@ -34,6 +36,8 @@ describe('desktop package target', () => {
   })
 
   it('parses installer and unpacked-directory invocations', () => {
+    expect(parseDesktopPackageInvocation(['linux-x64', '--unsigned'], 'linux', 'x64').unsigned).toBe(true)
+    expect(() => parseDesktopPackageInvocation(['linux-x64'], 'linux', 'x64')).toThrow(/use --unsigned/u)
     expect(parseDesktopPackageInvocation(['mac-arm64'], 'darwin', 'arm64').directory).toBe(false)
     expect(parseDesktopPackageInvocation(['mac-arm64', '--dir'], 'darwin', 'arm64').directory).toBe(true)
     expect(parseDesktopPackageInvocation([], 'darwin', 'arm64').target.name).toBe('mac-arm64')

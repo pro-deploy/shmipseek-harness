@@ -8,6 +8,14 @@ import { parseArgs } from 'node:util'
 import { DESKTOP_HOST_PROTOCOL_VERSION } from '../src/host-protocol.ts'
 import type { DesktopRelease } from '../src/release.ts'
 import { developmentRuntimeDirectory, resolveDesktopBuildTarget } from './desktop-build-paths.mjs'
+import type { DesktopAutoUpdateTarget } from './desktop-auto-update-environment.mjs'
+
+/** @returns the host's update target; the development project records one, which Linux does not have. */
+function developmentTarget(): DesktopAutoUpdateTarget {
+  const target = resolveDesktopBuildTarget()
+  if (target === 'linux-x64') throw new Error('desktop development: launching from source is supported on macOS and Windows')
+  return target
+}
 import { prepareDevelopmentProject } from './development-project.ts'
 import { prepareDevelopmentApp } from './development-app.ts'
 import { preparePrimaryRuntime } from './prepare-primary-runtime.ts'
@@ -118,7 +126,7 @@ async function main(): Promise<void> {
     hostDir: join(REPOSITORY_ROOT, 'apps', 'desktop-host'),
     dependencyDir: join(REPOSITORY_ROOT, 'node_modules', '.pnpm', 'node_modules'),
     release,
-    target: resolveDesktopBuildTarget(),
+    target: developmentTarget(),
   })
   await preparePrimaryRuntime()
   await launchElectron()

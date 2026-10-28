@@ -1,0 +1,98 @@
+name: Desktop installers
+
+# Unsigned installers for macOS, Windows, and Linux built on GitHub-hosted runners. A pushed v* tag also publishes them as a GitHub Release.
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: desktop-installers-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  package:
+    name: ${{ matrix.target }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: mac-arm64
+            runner: macos-14
+            script: package:desktop:mac:arm64:unsigned
+          - target: mac-x64
+            runner: macos-13
+            script: package:desktop:mac:x64:unsigned
+          - target: win-x64
+            runner: windows-latest
+            script: package:desktop:win:x64:unsigned
+          - target: linux-x64
+            runner: ubuntu-24.04
+            script: package:desktop:linux:x64:unsigned
+    defaults:
+      run:
+        shell: bash
+    env:
+      DSH_TELEMETRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@v5.0.0
+      - uses: actions/setup-node@v7.0.0
+        with:
+          node-version: '24'
+          cache: pnpm
+      - name: Install locked dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Write unsigned Windows settings
+        if: matrix.target == 'win-x64'
+        run: |
+          printf '%s\n' \
+            'DSH_DESKTOP_APP_ID=com.deepseek.harness' \
+            'DSH_DESKTOP_AUTO_UPDATE_ENV=test' \
+            'DSH_DESKTOP_WINDOWS_COMPRESSION_LEVEL=7' > apps/desktop/.env.windows
+      - name: Build installer
+        run: pnpm run ${{ matrix.script }}
+      - name: Upload installer
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: shmipseek-harness-${{ matrix.target }}
+          path: |
+            apps/desktop/.desktop-build/targets/${{ matrix.target }}/unsigned-artifacts/*.dmg
+            apps/desktop/.desktop-build/targets/${{ matrix.target }}/unsigned-artifacts/*.exe
+            apps/desktop/.desktop-build/targets/${{ matrix.target }}/unsigned-artifacts/*.AppImage
+            apps/desktop/.desktop-build/targets/${{ matrix.target }}/unsigned-artifacts/*.deb
+          compression-level: 0
+          if-no-files-found: error
+          retention-days: 30
+      - name: Upload packaging diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: packaging-logs-${{ matrix.target }}
+          include-hidden-files: true
+          path: apps/desktop/.desktop-build/packaging-runs/
+          if-no-files-found: ignore
+          retention-days: 14
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: package
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v8.0.1
+        with:
+          path: installers
+          merge-multiple: true
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" installers/* --repo "$GITHUB_REPOSITORY" --title "$GITHUB_REF_NAME" --generate-notes

@@ -1,6 +1,6 @@
 /** Submit one production fixed-installer cache purge to EdgeOne. */
 import type { teo } from 'tencentcloud-sdk-nodejs-teo'
-import type { DesktopPackageTargetName } from './package-target.ts'
+import type { DesktopAutoUpdateTarget as DesktopPackageTargetName } from './desktop-auto-update-environment.mjs'
 import { desktopLatestInstallerFilename, requiredEnvironmentValue, resolveDesktopAutoUpdateEnvironment, resolveDesktopUploadConfig } from './desktop-auto-update-environment.mjs'
 import { desktopTargetPlatform } from './desktop-build-paths.mjs'
 

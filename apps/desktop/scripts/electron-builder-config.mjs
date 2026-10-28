@@ -248,7 +248,10 @@ export function createElectronBuilderConfig(
     },
     linux: {
       category: 'Development',
-      target: ['AppImage'],
+      executableName: 'shmipseek-harness',
+      icon: fileURLToPath(new URL('../resources/icon.png', import.meta.url)),
+      target: ['AppImage', 'deb'],
+      maintainer: 'Max Birkin <maxbirkin@gmail.com>',
     },
     nsis: {
       uninstallDisplayName: '${productName}',
