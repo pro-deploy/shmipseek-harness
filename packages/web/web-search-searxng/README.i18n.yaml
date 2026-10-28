@@ -1,0 +1,40 @@
+# Bilingual-pair consistency record for README.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write packages/web/web-search-searxng/README.md
+/:
+  en: 70c6747864901c60
+  zh: f4d2182e89f2733a
+/deepseek-ai-dsh-web-search-searxng:
+  en: bbd2343526932028
+  zh: 9c036d33c506b6a9
+/deepseek-ai-dsh-web-search-searxng/summary:
+  en: 78f56c1e9f4b60d8
+  zh: 43ece50a3944439d
+/deepseek-ai-dsh-web-search-searxng/table-of-contents:
+  en: 76368b6b1da79c80
+  zh: 52384aee991ac542
+/deepseek-ai-dsh-web-search-searxng/use-this-package:
+  en: f63eb212bbf6e99d
+  zh: 8fe5a3a300e643fa
+/deepseek-ai-dsh-web-search-searxng/use-this-package/run-a-local-instance:
+  en: 72e93ad8437b0207
+  zh: ec5595823833fa74
+/deepseek-ai-dsh-web-search-searxng/use-this-package/what-a-search-returns:
+  en: 0e7e1a0e00635d9a
+  zh: e305d765a1c699e4
+/deepseek-ai-dsh-web-search-searxng/understand-the-implementation:
+  en: e51fe0d0b93f1207
+  zh: 7520a11bfc96f932
+/deepseek-ai-dsh-web-search-searxng/model-experience:
+  en: faf93d087c45403b
+  zh: fce8c7e77fa13bc8
+/deepseek-ai-dsh-web-search-searxng/model-experience/kv-cache-effect:
+  en: 40294c1c31b74824
+  zh: 5180853e10e8f8fa
+/deepseek-ai-dsh-web-search-searxng/known-limitations-and-deferred-work:
+  en: 6649f6fdf4db9f4c
+  zh: 619665d0ca425826
+/deepseek-ai-dsh-web-search-searxng/known-limitations-and-deferred-work/dev-note:
+  en: e67f633dc6fe7773
+  zh: 8afd9c88279ec147

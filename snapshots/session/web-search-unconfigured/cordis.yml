@@ -1,0 +1,15 @@
+# Live-recording patch: the search key reference names no credential, so the
+# model request withholds web_search while the rest of the tool surface stays.
+- insert:
+    - id: web-search-deepseek
+      name: '@deepseek-ai/dsh-web-search-deepseek'
+      config:
+        apiKeyEnv: DSH_SNAPSHOT_UNSET_SEARCH_KEY
+
+# Shipped profiles mount no search provider and keep web_search off; this
+# case opts in to the optional DeepSeek provider and the tool.
+- id: tool-web
+  config:
+    search: true
+    fetch: true
+    searchTimeoutMs: 60000
