@@ -136,6 +136,8 @@ export interface PromptAssembly extends PromptPresentation {
 const SECTION_ORDERS = {
   HARNESS_IDENTITY: -1000,
   DEPLOYMENT_PERSONA_PREFIX: 0,
+  // The user's own global instructions follow the deployment persona.
+  USER_SYSTEM_PROMPT: 100,
   PLAN_POLICY: 500,
   TEAM_POLICY: 600,
   PTC_ONLY: 800,

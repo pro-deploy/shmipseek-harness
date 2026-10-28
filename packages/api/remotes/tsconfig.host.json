@@ -87,6 +87,9 @@
       "path": "../../host/plugin-inventory"
     },
     {
+      "path": "../../preset/user-customization"
+    },
+    {
       "path": "../account-controller"
     },
     {

@@ -438,6 +438,23 @@
     - id: mcp-resources
       name: '@deepseek-ai/dsh-mcp-resources'
 
+    # The user's own global system prompt, MCP servers, and skills. Each row id
+    # is the settings namespace the client's customization pages edit; saved
+    # values apply without a restart (the prompt at the next model request, the
+    # server and skill lists within one poll interval).
+    - id: user-system-prompt
+      name: '@deepseek-ai/dsh-user-customization'
+
+    - id: user-mcp-servers
+      name: '@deepseek-ai/dsh-user-customization/mcp-servers'
+      config:
+        pollIntervalMs: 1000
+
+    - id: user-skills
+      name: '@deepseek-ai/dsh-user-customization/skills'
+      config:
+        pollIntervalMs: 1000
+
     # ── rows every mode mounts, whose values each overlay may state ──────────────
 
     # Shared tool definitions and the deployment’s native executor.

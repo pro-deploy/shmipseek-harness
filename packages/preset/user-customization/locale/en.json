@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Global system prompt",
+    "description": "Add the instructions you write in settings to every system prompt."
+  }
+}

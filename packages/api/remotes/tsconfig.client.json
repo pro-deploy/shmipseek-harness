@@ -52,6 +52,9 @@
       "path": "../../host/plugin-inventory"
     },
     {
+      "path": "../../preset/user-customization"
+    },
+    {
       "path": "../../interaction/commands"
     },
     {

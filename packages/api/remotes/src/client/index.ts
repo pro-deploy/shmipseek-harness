@@ -18,6 +18,7 @@ import toolResultsRemote from '@deepseek-ai/dsh-client-ui-trajectory/remote'
 import pluginRegistryProbeRemote from '@deepseek-ai/dsh-client-ui-plugin-manager/remote'
 import pluginMarketRemote from '@deepseek-ai/dsh-plugin-market/remote'
 import pluginInventoryRemote from '@deepseek-ai/dsh-host-plugin-inventory/remote'
+import userSystemPromptRemote from '@deepseek-ai/dsh-user-customization/remote'
 import messageFeedbackRemote from '@deepseek-ai/dsh-message-feedback/remote'
 import permissionPresetsRemote from '@deepseek-ai/dsh-permission-presets/remote'
 import sessionFeedbackRemote from '@deepseek-ai/dsh-command-feedback/remote'
@@ -59,6 +60,8 @@ export type {} from '@deepseek-ai/dsh-schedule/remote'
 export type {} from '@deepseek-ai/dsh-office-to-pdf/remote'
 export type {} from '@deepseek-ai/dsh-llm/remote'
 export type {} from '@deepseek-ai/dsh-host-plugin-inventory/remote'
+export type {} from '@deepseek-ai/dsh-user-customization/remote'
+export type { UserSystemPromptPreview } from '@deepseek-ai/dsh-user-customization/types'
 export type {} from '@deepseek-ai/dsh-message-feedback/remote'
 export type {} from '@deepseek-ai/dsh-permission-presets/remote'
 export type {} from '@deepseek-ai/dsh-command-feedback/remote'
@@ -195,7 +198,7 @@ export async function apply(ctx: Context): Promise<() => Promise<void>> {
       messageFeedbackRemote, sessionFeedbackRemote,
       fileUploadsRemote, sessionReferencesRemote,
       permissionPresetsRemote, subagentsRemote, sessionRemote, jobRemote, workspaceRemote, workspaceFilesRemote, terminalRemote,
-      officeToPdfRemote, userQuestionsRemote,
+      officeToPdfRemote, userQuestionsRemote, userSystemPromptRemote,
     ]) {
       disposers.push(await ctx.remote.$mount(contribution))
     }

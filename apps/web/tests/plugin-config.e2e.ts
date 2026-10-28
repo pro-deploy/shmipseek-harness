@@ -86,14 +86,14 @@ describe('web e2e: plugin configuration pages', () => {
     onTestFailed(() => saveFailureShot(page, 'web-e2e-plugin-config-cards'))
     const panel = await openPlugins()
 
-    // Every page the shipped web composition exposes: the shell executor, the
-    // agent loop, and subagent selection.
+    // Every page the shipped web composition exposes: the user's system prompt,
+    // MCP servers, and skills, subagent selection, the agent loop, and the shell executor.
     await panel.getByRole('button', { name: '查看 子智能体', exact: true }).waitFor({ timeout: 20_000 })
     const basic = panel.locator('[data-plugin-group="basic"]')
-    expect(await basic.locator('[data-plugin-item]').count()).toBe(3)
+    expect(await basic.locator('[data-plugin-item]').count()).toBe(6)
     expect(await basic.locator(':scope > ul > li').evaluateAll(cards => cards.map(card => card.getAttribute('data-plugin-item'))))
-      .toEqual(['subagent', 'agent-loop', 'shell'])
-    for (const title of ['子智能体', 'Agent 循环', '终端']) {
+      .toEqual(['user-system-prompt', 'user-mcp-servers', 'user-skills', 'subagent', 'agent-loop', 'shell'])
+    for (const title of ['系统提示词', 'MCP 服务器', '技能', '子智能体', 'Agent 循环', '终端']) {
       expect(await basic.getByRole('button', { name: `查看 ${title}`, exact: true }).count()).toBe(1)
     }
     // A card carries the one-liner; the fields wait for the page.

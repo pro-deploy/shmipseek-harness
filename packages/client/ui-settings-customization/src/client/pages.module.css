@@ -1,0 +1,104 @@
+/* Customization pages: multi-line fields and the server and skill list cards. */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 0;
+}
+
+.label {
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.5;
+  color: var(--dsw-alias-label-primary);
+}
+
+.hint {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--dsw-alias-label-tertiary);
+}
+
+.invalid {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--dsw-alias-state-error-primary);
+}
+
+.input,
+.textarea,
+.select {
+  padding: 7px 12px;
+  border: 0.5px solid var(--dsw-alias-border-l4);
+  border-radius: var(--dsw-radius-md);
+  background: var(--dsw-alias-bg-layer-3);
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--dsw-alias-label-primary);
+}
+
+.textarea {
+  min-height: 72px;
+  resize: vertical;
+  font-family: var(--dsw-font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+}
+
+.textarea.tall {
+  min-height: 260px;
+}
+
+.input:focus-visible,
+.textarea:focus-visible,
+.select:focus-visible {
+  outline: none;
+  border-color: var(--dsw-alias-state-business-primary);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  padding: 4px 14px 12px;
+  border: 0.5px solid var(--dsw-alias-border-l2);
+  border-radius: var(--dsw-radius-lg, 12px);
+  background: var(--dsw-alias-bg-layer-2);
+}
+
+.cardHead {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-top: 10px;
+}
+
+.cardHead > .field {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 0 4px;
+}
+
+.empty {
+  margin: 0;
+  padding: 12px 0;
+  font-size: 13px;
+  color: var(--dsw-alias-label-secondary);
+}

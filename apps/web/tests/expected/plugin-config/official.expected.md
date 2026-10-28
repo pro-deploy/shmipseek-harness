@@ -8,6 +8,15 @@
 - heading "内置插件配置" [level=3]
 - list:
   - listitem:
+    - button "查看 系统提示词": 系统提示词
+    - text: 你自己的指令，会加入每个 Agent 的系统提示词。
+  - listitem:
+    - button "查看 MCP 服务器": MCP 服务器
+    - text: 连接你自己的 MCP 服务器，其工具将对所有 Agent 可用。
+  - listitem:
+    - button "查看 技能": 技能
+    - text: 编写所有 Agent 在所有项目中都能使用的技能。
+  - listitem:
     - button "查看 子智能体": 子智能体
     - text: 设置子智能体的递归层级、数量和模型。
   - listitem:

@@ -1,0 +1,46 @@
+# Bilingual-pair consistency record for README.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write packages/preset/user-customization/README.md
+/:
+  en: 8901882794d305f3
+  zh: edccb5f43fac4477
+/deepseek-ai-dsh-user-customization:
+  en: ff9fcfd247cae851
+  zh: bd7af47ae889dfa0
+/deepseek-ai-dsh-user-customization/summary:
+  en: 0130cf4ccfee8653
+  zh: bf10644eb2efa69d
+/deepseek-ai-dsh-user-customization/table-of-contents:
+  en: 76368b6b1da79c80
+  zh: 52384aee991ac542
+/deepseek-ai-dsh-user-customization/use-this-package:
+  en: f80c7ce7948b9df0
+  zh: 67ccaba153fde619
+/deepseek-ai-dsh-user-customization/understand-the-implementation:
+  en: 961f075b89debfa6
+  zh: f52cc96a6c944287
+/deepseek-ai-dsh-user-customization/model-experience:
+  en: 215e7ba838619b7b
+  zh: a311da3843709f90
+/deepseek-ai-dsh-user-customization/model-experience/the-user-system-prompt-section:
+  en: 05750fc2cff490c2
+  zh: 1b6dd4bf4fe355cd
+/deepseek-ai-dsh-user-customization/model-experience/the-user-system-prompt-section/what-the-model-sees:
+  en: 6ace2cb28ca33e90
+  zh: a70aaf74d61e3a74
+/deepseek-ai-dsh-user-customization/model-experience/the-user-system-prompt-section/what-the-model-sees/user-system-prompt-section:
+  en: 6f7ef97fd0076570
+  zh: 726731bcc290732d
+/deepseek-ai-dsh-user-customization/model-experience/the-user-system-prompt-section/token-effect:
+  en: 65e0e9ff51f979bf
+  zh: 29a3b58bc6759862
+/deepseek-ai-dsh-user-customization/model-experience/the-user-system-prompt-section/kv-cache-effect:
+  en: d5f0b429c826259e
+  zh: 053c7a85854c8ee1
+/deepseek-ai-dsh-user-customization/known-limitations-and-deferred-work:
+  en: ca6b7013a36e233c
+  zh: cf7f3b89a641e2e2
+/deepseek-ai-dsh-user-customization/known-limitations-and-deferred-work/dev-note:
+  en: e67f633dc6fe7773
+  zh: 8afd9c88279ec147
