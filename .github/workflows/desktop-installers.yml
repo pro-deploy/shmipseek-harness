@@ -64,6 +64,12 @@ jobs:
             'DSH_DESKTOP_AUTO_UPDATE_ENV=test' \
             'DSH_DESKTOP_WINDOWS_COMPRESSION_LEVEL=7' > apps/desktop/.env.windows
       - name: Build installer
+        if: matrix.target != 'win-x64'
+        run: pnpm run ${{ matrix.script }}
+      # PowerShell resolves tar to Windows bsdtar; Git's GNU tar in the bash PATH reads D:\ paths as remote hosts.
+      - name: Build installer (Windows)
+        if: matrix.target == 'win-x64'
+        shell: pwsh
         run: pnpm run ${{ matrix.script }}
       - name: Upload installer
         uses: actions/upload-artifact@v7.0.1

@@ -106,6 +106,8 @@ export function createElectronBuilderConfig(
     appId,
     protocols: [{ name: 'ShmipSeek Harness', schemes: ['dsh'] }],
     extraMetadata: {
+      // Linux packages require a project homepage in their control metadata.
+      homepage: 'https://github.com/pro-deploy/shmipseek-harness',
       dshDesktopAppId: appId,
       dshDesktopUpdateChannel: update?.channel ?? 'nightly',
       ...buildVersion === productVersion ? {} : { version: buildVersion },
