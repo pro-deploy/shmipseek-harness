@@ -4,3 +4,4 @@ Welcome to ShmipSeek Harness
 Build potential. Explore intelligence.
 Sign in
 Add API Key
+Continue without signing in

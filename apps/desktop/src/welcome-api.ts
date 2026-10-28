@@ -47,7 +47,8 @@ export interface WelcomeOperations {
    */
   saveApiKey(value: string): Promise<WelcomeSaveResult>
   /**
-   * Enter the workspace without writing an onboarding-completion setting.
+   * Enter the workspace without signing in or storing a key. Later startups open the workspace
+   * directly; providers are configured in Settings. An explicit sign-out shows the welcome again.
    * @returns completion after the workspace opens.
    */
   skip(): Promise<void>

@@ -48,6 +48,14 @@ function mount(language = 'zh-CN', takeNotice = vi.fn<() => Promise<WelcomeNotic
 }
 
 describe('desktop welcome presentation', () => {
+  it('continues to the workspace without signing in from the entry page', async () => {
+    const view = mount('ru')
+    expect(view.button('#continue-without-sign-in').textContent).toBe('Продолжить без входа')
+    fireEvent.click(view.button('#continue-without-sign-in'))
+    await vi.waitFor(() => { expect(view.api.skip).toHaveBeenCalledOnce() })
+    expect(view.api.startSignIn).not.toHaveBeenCalled()
+  })
+
   it.each(['zh-CN', 'en'])('renders the %s entry and API-key step', async (language) => {
     const view = mount(language)
     expect(view.document.documentElement.lang).toBe(language)
