@@ -56,7 +56,7 @@ async function boot(platform: ShortcutPlatform = 'macos', runtime: 'desktop' | '
   const openTabs = createSnapshotStore<readonly { sessionId: string; tabId: TabId }[]>([])
   const target = { sessionId: 'session', paneId: 'pane' }
   const sidebar = { openTabs, commandTarget: vi.fn<() => typeof target | undefined>(() => target),
-    openTabFromTarget: vi.fn() }
+    openTabFromTarget: vi.fn(), openTabIn: vi.fn() }
   const registry = new ShortcutRegistry(runtime, platform)
   ctx.provide('sidebarRight', sidebar as never)
   ctx.provide('shortcuts', { register: (command: ShortcutCommand) => registry.register(command) } as never)
@@ -76,6 +76,8 @@ describe('ui-sidebar-browser apply', () => {
       acquire,
       release: vi.fn(async () => {}),
       onOpenRequested: vi.fn(() => () => {}),
+      onAgentOpenRequested: vi.fn(() => () => {}),
+      onAgentActivity: vi.fn(() => () => {}),
     }
     vi.stubGlobal('dshDesktop', { protocolVersion, browser: bridge })
     const h = await boot()
@@ -96,7 +98,7 @@ describe('ui-sidebar-browser apply', () => {
         initial: undefined, initialUrl: 'https://example.test/', openTab: vi.fn() })
       expect(replacementStore.getSnapshot().byTab[tabId]).toBeDefined()
       expect(firstStore.getSnapshot().byTab[tabId]).toBeUndefined()
-      if (protocolVersion === 1) await vi.waitFor(() => { expect(acquire).toHaveBeenCalledWith('session:session') })
+      if (protocolVersion === 1) await vi.waitFor(() => { expect(acquire).toHaveBeenCalledWith('session:session', 'session') })
       else expect(host.querySelector('iframe')).not.toBeNull()
       h.openTabs.set([{ sessionId: 'other', tabId }, { sessionId: 'session', tabId: 'other-tab' as TabId }])
       signal.abort()
@@ -116,6 +118,26 @@ describe('ui-sidebar-browser apply', () => {
       await h.fiber.dispose()
       host.remove()
     }
+  })
+
+  it('opens a browser tab in the requesting Session for an agent request until unloaded', async () => {
+    const listeners = new Set<(request: { session: string; url: string }) => void>()
+    const bridge: DesktopBrowserBridge = {
+      acquire: vi.fn(async () => ({ lease: 'agent-lease' as DesktopBrowserLeaseId, partition: 'partition' })),
+      release: vi.fn(async () => {}),
+      onOpenRequested: vi.fn(() => () => {}),
+      onAgentOpenRequested: vi.fn((listener: (request: { session: string; url: string }) => void) => {
+        listeners.add(listener)
+        return () => { listeners.delete(listener) }
+      }),
+      onAgentActivity: vi.fn(() => () => {}),
+    }
+    vi.stubGlobal('dshDesktop', { protocolVersion: 1, browser: bridge })
+    const h = await boot()
+    for (const listener of listeners) listener({ session: 'chat', url: 'https://www.ozon.ru/' })
+    expect(h.sidebar.openTabIn).toHaveBeenCalledWith('chat', BROWSER_KIND, { params: { url: 'https://www.ozon.ru/' }, revealIfOpened: false })
+    await h.fiber.dispose()
+    expect(listeners.size).toBe(0)
   })
 
   it('registers a multi-instance builtin and its body and title', async () => {

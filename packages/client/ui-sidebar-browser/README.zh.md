@@ -46,6 +46,8 @@ Client 插件可以调用 `ctx.sidebarRight.openTab('browser', { params: { url }
 
 工具栏提供后退、前进、刷新、前往和在系统浏览器中打开。Web 还提供逐 tab sandbox 开关；关闭它是临时选择，并会显示灰字、琥珀色底的警告。Desktop 显示观察到的页面标题。重启后，Browser 展示保存的标题和 URL；只有点击恢复或刷新才打开该地址。
 
+在 Desktop 上，会话的智能体通过 [dsh-browser-use-desktop](../../browser-use/browser-use-desktop/README.zh.md) 操作该会话的 Browser tab。命令运行期间及其后片刻，tab 显示助手正在操作它的提示；用户可以同时继续使用该 tab。智能体打开页面的请求会在发起请求的会话中创建 Browser tab，前提是该会话的 Sidebar 已加载。
+
 -----
 
 <a id="understand-the-implementation"></a>
@@ -69,6 +71,8 @@ Web 记录 toolbar 提交和 typed tab 打开。导航状态机把每个受控 r
 每个 tab 的 `BrowserController` 负责地址校验、命令和显式恢复。`BrowserFrame` 提供与载体无关的导航状态；`IframeImpl` 使用 `BrowserNavigation`，`ElectronWebViewImpl` 观察 Chromium history。`BrowserPresentation` 负责 DOM 的物理挂载。Slot injection 提供 `useBrowserState` 和普通 callback，React body 不接收 provider 对象或 observable。
 
 Desktop 主进程批准 guest 租约，并执行挂载、导航和权限策略。preload 只暴露限定范围的 Browser 操作。共享声明通过标准 `/types` 出口配合 `import type` 引入；Host 与 Client 使用独立 tsconfig 编译。Desktop Browser tab 声明 `keepMounted`，Sidebar 因而在切 tab、切 Session、收起与浮动期间保留其 DOM。
+
+每个租约记录持有该 tab 的 Sidebar 所属的 Session，因此一个会话的智能体命令只能到达该会话的 tab。智能体活动与智能体打开请求通过同一个限定范围的 preload 桥送达。
 
 页面刷新快捷键调用工具栏使用的同一重载操作。其 Tooltip 和 ARIA 组合随有效绑定更新。Desktop 通过所属窗口路由已批准 guest 中的有效快捷键；获焦 webview 必须仍持有该 guest 的租约。Web 保留浏览器专用组合。
 

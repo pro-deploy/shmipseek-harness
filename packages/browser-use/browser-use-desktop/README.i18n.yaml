@@ -1,0 +1,49 @@
+# Bilingual-pair consistency record for README.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write packages/browser-use/browser-use-desktop/README.md
+/:
+  en: abf95facbfdfbde8
+  zh: 59efcd04bb2ce2d0
+/deepseek-ai-dsh-browser-use-desktop:
+  en: 6cbdee3bafc823e5
+  zh: 34b0f5aa334f73a9
+/deepseek-ai-dsh-browser-use-desktop/summary:
+  en: 21216947e95c0912
+  zh: 94e0ed0a5f9b9c5d
+/deepseek-ai-dsh-browser-use-desktop/table-of-contents:
+  en: d152484eb41ac6b4
+  zh: 9f0336825ccdaacd
+/deepseek-ai-dsh-browser-use-desktop/use-this-package:
+  en: 3a58b055bce99fd4
+  zh: 0d30af4e1b3c3ad3
+/deepseek-ai-dsh-browser-use-desktop/understand-the-implementation:
+  en: e97ce91ee4090914
+  zh: c22f8e5c62f5c4a7
+/deepseek-ai-dsh-browser-use-desktop/further-exploration:
+  en: deb45f94db3bfd66
+  zh: b927dd4c459da3e9
+/deepseek-ai-dsh-browser-use-desktop/model-experience:
+  en: 215e7ba838619b7b
+  zh: a311da3843709f90
+/deepseek-ai-dsh-browser-use-desktop/model-experience/the-desktop-browser-section:
+  en: 89991b29819e60c1
+  zh: 60506927b38c017d
+/deepseek-ai-dsh-browser-use-desktop/model-experience/the-desktop-browser-section/what-the-model-sees:
+  en: 4cfa762e510ebf64
+  zh: c4d8b69bddb168ed
+/deepseek-ai-dsh-browser-use-desktop/model-experience/the-desktop-browser-section/what-the-model-sees/browser-use-desktop-section:
+  en: 5c0b0b257b5a07ae
+  zh: 70dac6ed1422733f
+/deepseek-ai-dsh-browser-use-desktop/model-experience/the-desktop-browser-section/token-effect:
+  en: 7fcb126d71496505
+  zh: 74504498f491a473
+/deepseek-ai-dsh-browser-use-desktop/model-experience/the-desktop-browser-section/kv-cache-effect:
+  en: 6d696260cf0a34b4
+  zh: e86a1248a785fb8f
+/deepseek-ai-dsh-browser-use-desktop/known-limitations-and-deferred-work:
+  en: 1681e415388c8f1c
+  zh: f7f014ccc8c768e9
+/deepseek-ai-dsh-browser-use-desktop/known-limitations-and-deferred-work/dev-note:
+  en: e67f633dc6fe7773
+  zh: 8ec3e73528ddb1a6

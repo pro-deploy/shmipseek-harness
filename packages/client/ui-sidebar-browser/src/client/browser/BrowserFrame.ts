@@ -18,6 +18,8 @@ export interface BrowserFrameState {
   readonly error: BrowserLoadError | undefined
   /** Undefined when this provider does not expose a sandbox control. */
   readonly sandboxEnabled: boolean | undefined
+  /** An agent command is operating the page or did so moments ago. */
+  readonly agentActive: boolean
 }
 
 /** Optional iframe policy control, not an Electron process-sandbox switch. */
@@ -47,5 +49,5 @@ export interface BrowserFrame extends HostObservable<BrowserFrameState> {
  */
 export function emptyBrowserFrame(): BrowserFrameState {
   return { target: undefined, address: 'empty', loading: false, canGoBack: false, canGoForward: false,
-    error: undefined, sandboxEnabled: undefined }
+    error: undefined, sandboxEnabled: undefined, agentActive: false }
 }

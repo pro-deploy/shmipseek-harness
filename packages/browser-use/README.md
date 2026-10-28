@@ -9,7 +9,7 @@ English | [中文](README.zh.md)
 
 ## Summary
 
-Browser-use providers let models inspect and operate web pages. This group owns exclusive provider registration. Experimental providers supply browser tools and manage each Session's browser resources.
+Browser-use providers let models inspect and operate web pages. This group owns exclusive provider registration and the Desktop provider, which operates the browser tabs the user sees in the right Sidebar. Experimental providers supply browser tools and manage each Session's browser resources.
 
 ## Table of Contents
 
@@ -27,6 +27,7 @@ Choose one provider and mount the shared registration service.
 | Package | Role | ctx key |
 |---|---|---|
 | [`browser-use`](browser-use/README.md) | Exclusive named provider registration | `ctx.browserUse` |
+| [`browser-use-desktop`](browser-use-desktop/README.md) | Agent tools for the Desktop right-Sidebar browser tabs | — |
 
 <a id="related-documentation"></a>
 ## Related documentation

@@ -1,0 +1,128 @@
+/* Browser tool row: the ToolRow-matched summary line plus a bounded result disclosure. */
+
+.card {
+  display: flex;
+  flex-direction: column;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  height: calc(24px + var(--dsh-content-font-delta, 0px));
+  min-width: 0;
+  color: var(--dsw-alias-label-tertiary);
+  transition: color 100ms ease;
+}
+
+@media (hover: hover) {
+  .row:hover {
+    color: var(--dsw-alias-label-secondary);
+  }
+}
+
+.row[data-expandable] {
+  cursor: pointer;
+}
+
+.leading {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(16px + var(--dsh-content-font-delta, 0px));
+  height: calc(16px + var(--dsh-content-font-delta, 0px));
+  margin-right: 6px;
+}
+
+.leading svg {
+  width: calc(14px + var(--dsh-content-font-delta, 0px));
+  height: calc(14px + var(--dsh-content-font-delta, 0px));
+}
+
+.title,
+.summary {
+  font-size: var(--dsh-content-font-size-secondary, 13px);
+  line-height: calc(24px + var(--dsh-content-font-delta, 0px));
+}
+
+.title {
+  flex: none;
+}
+
+.separator {
+  flex: none;
+  width: 2px;
+  height: 2px;
+  margin: 0 8px;
+  border-radius: 1px;
+  background: var(--dsw-alias-label-caption);
+}
+
+.summary {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.summary[data-state='error'] {
+  color: var(--dsw-alias-state-error-primary);
+}
+
+.summary[data-state='stopped'] {
+  color: var(--dsw-alias-state-warn-label);
+}
+
+.output {
+  max-height: 260px;
+  margin: 4px 0 4px 4px;
+  padding: 10px 12px;
+  overflow: auto;
+  border: 0.5px solid var(--dsw-alias-border-l1);
+  border-radius: var(--dsw-radius-lg);
+  background: var(--dsw-alias-markdown-code-block);
+  color: var(--dsw-alias-label-secondary);
+  font: var(--dsw-font-markdown-code-block-small);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.output[data-state='error'] {
+  color: var(--dsw-alias-state-error-primary);
+}
+
+.inspect {
+  align-self: flex-start;
+  margin: 0 0 2px 4px;
+  padding: 2px 8px;
+  border: 0.5px solid var(--dsw-alias-border-l4);
+  border-radius: 999px;
+  background: var(--dsw-alias-bg-base);
+  color: var(--dsw-alias-label-secondary);
+  font-size: 11px;
+  line-height: 16px;
+  cursor: pointer;
+}
+
+@media (hover: hover) {
+  .inspect:hover {
+    background: var(--dsw-alias-interactive-bg-hover-solid);
+    color: var(--dsw-alias-label-primary);
+  }
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .row {
+    transition: none;
+  }
+}

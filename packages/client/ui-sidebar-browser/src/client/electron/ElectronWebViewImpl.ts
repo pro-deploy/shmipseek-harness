@@ -36,10 +36,11 @@ export class ElectronWebViewImpl implements BrowserFrame {
    * @param bridge - main-process guest operations.
    * @param workspace - resolves the storage account once for this frame lifetime.
    * @param presentation - tag and Sidebar placement adapter.
+   * @param session - Session whose right Sidebar holds the tab; its agent may operate the guest.
    */
   constructor(private readonly options: BrowserPageOptions, private readonly bridge: DesktopBrowserBridge,
     private readonly workspace: (signal: AbortSignal) => Promise<string>,
-    private readonly presentation: ElectronWebviewPresentation) {
+    private readonly presentation: ElectronWebviewPresentation, private readonly session: string) {
     this.checkpoint = currentBrowserTarget(options.initial)
     this.store = createSnapshotStore(emptyBrowserFrame())
   }
@@ -144,7 +145,7 @@ export class ElectronWebViewImpl implements BrowserFrame {
   private async createGuest(attachmentSignal: AbortSignal): Promise<void> {
     this.workspaceKey ??= await this.workspace(attachmentSignal)
     if (attachmentSignal.aborted) return
-    const reservation = await this.bridge.acquire(this.workspaceKey)
+    const reservation = await this.bridge.acquire(this.workspaceKey, this.session)
     // oxlint-disable-next-line typescript/no-unnecessary-condition -- The signal can abort while acquire is pending.
     if (attachmentSignal.aborted) { await this.release(reservation.lease); return }
     this.lease = reservation.lease
@@ -156,6 +157,12 @@ export class ElectronWebViewImpl implements BrowserFrame {
       if (this.element === element && !signal.aborted) this.options.openRequested(url)
     })
     signal.addEventListener('abort', unsubscribeOpen, { once: true })
+    const unsubscribeActivity = this.bridge.onAgentActivity(reservation.lease, (agentActive) => {
+      if (this.element === element && !signal.aborted && this.store.getSnapshot().agentActive !== agentActive) {
+        this.store.set({ ...this.store.getSnapshot(), agentActive })
+      }
+    })
+    signal.addEventListener('abort', unsubscribeActivity, { once: true })
     element.addEventListener('dom-ready', () => {
       this.ready = true
       this.observe(this.store.getSnapshot().address !== 'requested')
@@ -251,6 +258,7 @@ export class ElectronWebViewImpl implements BrowserFrame {
 
   private dropGuest(): Promise<void> {
     this.guestLifetime?.abort()
+    if (this.store.getSnapshot().agentActive) this.store.set({ ...this.store.getSnapshot(), agentActive: false })
     this.guestLifetime = undefined
     this.presentation.clear()
     this.element = undefined

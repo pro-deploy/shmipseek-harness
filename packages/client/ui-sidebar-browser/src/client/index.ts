@@ -15,7 +15,7 @@ import { createElectronPage } from './electron/pages.ts'
 import type { DesktopBrowserBridge } from '../types.ts'
 import { browserWorkspace } from './electron/workspace.ts'
 import type { BrowserPageFactory } from './browser/BrowserPage.ts'
-import { BROWSER_ID, browserDefinition } from './definition.tsx'
+import { BROWSER_ID, BROWSER_KIND, browserDefinition } from './definition.tsx'
 import { en, ja, es, fr, de, ru, pt, zh } from './locales.ts'
 import { createBrowserStore } from './browser/store.ts'
 
@@ -97,8 +97,12 @@ export function apply(ctx: Context): void {
   if (desktop === undefined) installFrames(ctx, () => createIframePage)
   else ctx.inject(['workspaces'], (scope) => {
     installFrames(scope, sessionId => options => createElectronPage(options, desktop,
-      signal => browserWorkspace(scope.workspaces.list, sessionId, signal)))
+      signal => browserWorkspace(scope.workspaces.list, sessionId, signal), sessionId))
   })
+  // The main process approved the address; a Session without an adopted Sidebar opens nothing.
+  if (desktop !== undefined) ctx.effect(() => desktop.onAgentOpenRequested(({ session, url }) => {
+    ctx.sidebarRight.openTabIn(session as BrowserBodyProps['sessionId'], BROWSER_KIND, { params: { url }, revealIfOpened: false })
+  }), 'ui-sidebar-browser.agent-open')
   ctx.effect(() => ctx.slots.inject('sidebar.right.pane.tab.title', () => ctx.slots.register({
     name: 'sidebar.right.pane.tab.title', key: BROWSER_ID, store,
   }, BrowserTitle)), 'ui-sidebar-browser.title')

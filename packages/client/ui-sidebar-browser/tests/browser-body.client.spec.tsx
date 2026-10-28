@@ -126,6 +126,20 @@ describe('BrowserBody', () => {
     })
   })
 
+  it('shows the agent notice while an agent operates the page', () => {
+    const state = createSnapshotStore<BrowserFrameState>(emptyBrowserFrame())
+    const mounted = mountBrowser(undefined, { createPage: () => ({
+      presentation: { mount: () => () => {} },
+      frame: { getSnapshot: () => state.getSnapshot(), subscribe: listener => state.subscribe(listener),
+        loadUrl: vi.fn(), goBack: vi.fn(), goForward: vi.fn(), reload: vi.fn(), dispose: async () => {} },
+    }) })
+    expect(mounted.view.queryByText(zh['agent.active'])).toBeNull()
+    act(() => { state.set({ ...state.getSnapshot(), agentActive: true }) })
+    expect(mounted.view.getByRole('status').textContent).toBe(zh['agent.active'])
+    act(() => { state.set({ ...state.getSnapshot(), agentActive: false }) })
+    expect(mounted.view.queryByText(zh['agent.active'])).toBeNull()
+  })
+
   it('routes address input to the controller and renders parser failures', async () => {
     const mounted = mountBrowser()
     const input = mounted.view.getByRole('textbox')

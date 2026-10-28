@@ -63,6 +63,7 @@ import { readDesktopLocaleCache, writeDesktopLocaleCache } from './locale-cache.
 import { DesktopUpdateDialog, type UpdateDialogOptions } from './update-dialog.ts'
 import { readDesktopRuntime } from './runtime-tree.ts'
 import { DesktopBrowserGuests } from './browser-guests.ts'
+import { DesktopBrowserAgent } from './browser-agent.ts'
 import { installDesktopShortcuts } from './keyboard.ts'
 import { DesktopUpdateOverlays } from './update-overlay.ts'
 import { DesktopQuitConfirmation } from './quit-confirmation.ts'
@@ -486,6 +487,7 @@ async function main(): Promise<void> {
   let hostUrl: string | undefined
   let hostCookie: string | undefined
   const browserGuests = new DesktopBrowserGuests(() => hostUrl)
+  const browserAgent = new DesktopBrowserAgent(browserGuests)
   let injections: readonly unknown[] = []
   let welcomeBackend: DesktopWelcomeBackend | undefined
   let reportedLaunch = false
@@ -540,7 +542,7 @@ async function main(): Promise<void> {
           segmentBytes: 256 * 1024, recordBytes: 4096, queuedBytes: 64 * 1024,
         })
         operationJournal.enqueue(JSON.stringify(record))
-      })
+      }, (request, signal) => browserAgent.execute(request, signal))
     return {
       start: async () => {
         const ready = await host.start()
@@ -798,6 +800,7 @@ async function main(): Promise<void> {
   const shortcuts = installDesktopShortcuts(() => mainWindow, app.getPath('userData'),
     process.platform === 'darwin' ? 'macos' : process.platform === 'win32' ? 'windows' : 'linux', () => { refreshApplicationMenu() }, window => updateOverlays.input(window))
   app.on('will-quit', () => { shortcuts.dispose() })
+  app.on('will-quit', () => { browserAgent.dispose() })
 
   ipcMain.handle(DESKTOP_IPC.boot, async (event) => {
     assertDesktopSender(event, ['app'])
@@ -815,9 +818,9 @@ async function main(): Promise<void> {
     reportFatal(new Error(message), 'web-boot')
   })
 
-  ipcMain.handle(DESKTOP_IPC.browserAcquire, (event, workspace: unknown) => {
+  ipcMain.handle(DESKTOP_IPC.browserAcquire, (event, workspace: unknown, chatSession: unknown) => {
     assertProductSender(event)
-    return browserGuests.acquire(event.sender, workspace)
+    return browserGuests.acquire(event.sender, workspace, chatSession)
   })
   ipcMain.handle(DESKTOP_IPC.browserRelease, (event, lease: unknown) => {
     assertProductSender(event)

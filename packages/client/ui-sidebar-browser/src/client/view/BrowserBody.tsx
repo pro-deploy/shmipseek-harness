@@ -108,6 +108,7 @@ export function BrowserBody(props: BrowserBodyProps): ReactNode {
           onClick={() => { setSandbox(tab.id, !sandboxed) }}
         ><SandboxPolicyIcon sandboxed={sandboxed} /></button>}
       </form>
+      {frame.agentActive && <div className={css.agentActive} role="status">{t('agent.active')}</div>}
       {sandboxed === false && <div className={css.sandboxWarning} role="status">{t('sandbox.warning')}</div>}
       {error !== undefined && <div className={css.failure} role="status">{error.code !== undefined && error.description !== undefined
         ? t('load.failed.detail', { code: String(error.code), description: error.description })

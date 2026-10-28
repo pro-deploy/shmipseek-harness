@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, describe, expect, it, onTestFinished, vi } from 'vitest'
@@ -189,6 +189,45 @@ ${HTTP_HOST}`)
     abort.abort(new Error('cancelled'))
     await rejected
     await expect(host.resolveDragResource('local')).resolves.toMatchObject({ path: '/authorized/report.pdf' })
+  })
+
+  it('answers Host browser commands, rejects malformed ones, and aborts cancelled ones', async () => {
+    const runtime = projectWithHost(`
+import { writeFileSync } from 'node:fs'
+import { join } from 'node:path'
+const results = []
+process.on('message', message => {
+  if (message.type === 'shutdown') { process.send({ type: 'shutdown-complete' }, () => process.disconnect()); return }
+  if (message.type !== 'browser-result') return
+  results.push(message)
+  if (results.length === 3) writeFileSync(join(process.argv[3], 'browser.json'), JSON.stringify(results))
+})
+process.send({ type: 'ready', url: 'http://127.0.0.1:3080/' }, () => {
+  process.send({ type: 'browser-command', requestId: 1, session: 'chat', timeoutMs: 5000, command: { action: 'tabs' } })
+  process.send({ type: 'browser-command', requestId: 2, session: 'chat', timeoutMs: 5000, command: { action: 'click' } })
+  process.send({ type: 'browser-command', requestId: 3, session: 'chat', timeoutMs: 5000, command: { action: 'snapshot', maxTextChars: 10, maxElements: 10 } })
+  setTimeout(() => process.send({ type: 'browser-cancel', requestId: 3 }), 50)
+})
+`)
+    const seen: unknown[] = []
+    const host = new DesktopHostProcess(process.execPath, runtime, runtime, undefined, process.env, undefined,
+      undefined, undefined, undefined, undefined, async (request, signal) => {
+        seen.push(request)
+        if (request.command.action === 'tabs') return { kind: 'tabs', tabs: [] }
+        await new Promise((_resolve, reject) => { signal.addEventListener('abort', () => { reject(new Error('cancelled')) }) })
+        throw new Error('unreachable')
+      })
+    hosts.push(host)
+    await host.start()
+    const file = join(runtime, 'browser.json')
+    await vi.waitFor(() => { expect(existsSync(file)).toBe(true) }, { timeout: 5_000 })
+    const results = JSON.parse(readFileSync(file, 'utf8')) as { requestId: number }[]
+    expect(results.sort((left, right) => left.requestId - right.requestId)).toEqual([
+      { type: 'browser-result', requestId: 1, result: { kind: 'tabs', tabs: [] } },
+      { type: 'browser-result', requestId: 2, error: 'the browser command is invalid' },
+      { type: 'browser-result', requestId: 3, error: 'cancelled' },
+    ])
+    expect(seen).toHaveLength(2)
   })
 
   it('rejects malformed file authorization responses and terminates the Host', async () => {

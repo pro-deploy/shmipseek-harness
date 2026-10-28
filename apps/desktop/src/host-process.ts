@@ -6,6 +6,10 @@ import { z } from 'zod'
 import type { PlatformSession } from '@deepseek-ai/dsh-deepseek-account'
 import { desktopNodeEnvironment } from './node-environment.ts'
 import { parsePluginOperationRecord, type PluginOperationRecord, type PluginOperationRunId } from '@deepseek-ai/dsh-plugin-manager/diagnostic'
+import {
+  desktopBrowserCancelSchema, desktopBrowserRequestSchema,
+  type DesktopBrowserRequest, type DesktopBrowserResponse, type DesktopBrowserResult,
+} from '@deepseek-ai/dsh-browser-use-desktop/protocol'
 
 interface ReadyEvent {
   readonly type: 'ready'
@@ -54,6 +58,14 @@ export interface DesktopQuitInspection {
   readonly activeTasks: boolean
   readonly scheduledTasks: boolean
 }
+
+/**
+ * Execute one agent browser command for the Host.
+ * @param request - validated command with its Session and deadline.
+ * @param signal - aborted when the Host cancels the command or stops.
+ * @returns the command result; a rejection's message is returned to the Host as the command failure.
+ */
+export type DesktopBrowserCommandHandler = (request: DesktopBrowserRequest, signal: AbortSignal) => Promise<DesktopBrowserResult>
 
 /** Quit inspection deadline; a slower Host counts as unknown work and the shell asks before quitting. */
 export const QUIT_INSPECTION_DEADLINE_MS = 2_000
@@ -170,6 +182,7 @@ export class DesktopHostProcess {
   private stopping = false
   private shutdownCompleted = false
   private nextControlId = 1
+  private readonly browserRequests = new Map<number, AbortController>()
   private readonly controlRequests = new Map<number, {
     resolve: (response: DesktopHostControlResponse) => void
     reject: (error: Error) => void
@@ -187,6 +200,7 @@ export class DesktopHostProcess {
    * @param packageManager - Bundled pnpm entry and Node launcher directory, scoped to package operations.
    * @param onPlatformSession - Private credential updates for embedded Platform views.
    * @param onPluginOperation - Optional diagnostic sink; malformed records are ignored without failing the Host.
+   * @param onBrowserCommand - Executes the Host's agent browser commands; without it every command fails.
    */
   constructor(
     private readonly node: string,
@@ -200,6 +214,7 @@ export class DesktopHostProcess {
 
     private readonly onPlatformSession?: (session: PlatformSession | null) => void,
     private readonly onPluginOperation?: (record: PluginOperationRecord) => void,
+    private readonly onBrowserCommand?: DesktopBrowserCommandHandler,
   ) {}
 
   /**
@@ -236,6 +251,11 @@ export class DesktopHostProcess {
             console.error('desktop plugin operation diagnostic sink failed')
           }
         }
+        return
+      }
+      if (typeof message === 'object' && message !== null && 'type' in message
+        && (message.type === 'browser-command' || message.type === 'browser-cancel')) {
+        this.browserMessage(child, message)
         return
       }
       if (!isDesktopHostEvent(message)) {
@@ -305,6 +325,38 @@ export class DesktopHostProcess {
     return response.resource
   }
 
+  private browserMessage(child: ChildProcess, message: object): void {
+    const cancel = desktopBrowserCancelSchema.safeParse(message)
+    if (cancel.success) { this.browserRequests.get(cancel.data.requestId)?.abort(); return }
+    const reply = (response: DesktopBrowserResponse): void => {
+      if (child.connected) child.send(response, (_error) => {
+        // A disconnected Host no longer waits for this answer.
+      })
+    }
+    const parsed = desktopBrowserRequestSchema.safeParse(message)
+    if (!parsed.success) {
+      const requestId = 'requestId' in message ? message.requestId : undefined
+      if (typeof requestId === 'number' && Number.isSafeInteger(requestId) && requestId >= 0) {
+        reply({ type: 'browser-result', requestId, error: 'the browser command is invalid' })
+      }
+      return
+    }
+    const request = parsed.data
+    const abort = new AbortController()
+    this.browserRequests.get(request.requestId)?.abort()
+    this.browserRequests.set(request.requestId, abort)
+    void (async () => {
+      try {
+        if (this.onBrowserCommand === undefined || this.stopping) throw new Error('the browser is unavailable')
+        reply({ type: 'browser-result', requestId: request.requestId, result: await this.onBrowserCommand(request, abort.signal) })
+      } catch (error) {
+        reply({ type: 'browser-result', requestId: request.requestId, error: error instanceof Error ? error.message : String(error) })
+      } finally {
+        if (this.browserRequests.get(request.requestId) === abort) this.browserRequests.delete(request.requestId)
+      }
+    })()
+  }
+
   private async control(
     request: { readonly type: 'update-tasks'; readonly action: 'inspect' | 'lock' | 'unlock' } | { readonly type: 'quit-inspection' }
       | { readonly type: 'file-drag-resource'; readonly address: string },
@@ -370,6 +422,8 @@ export class DesktopHostProcess {
     if (this.runId !== undefined) Object.assign(error, { hostRunId: this.runId })
     this.onPlatformSession?.(null)
     this.readyReject(error)
+    for (const abort of this.browserRequests.values()) abort.abort(error)
+    this.browserRequests.clear()
     for (const request of this.controlRequests.values()) request.reject(error)
     this.controlRequests.clear()
     if (!this.failureReported && !this.stopping) {

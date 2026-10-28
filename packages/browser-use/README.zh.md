@@ -9,7 +9,7 @@ kind: "package-group"
 
 ## 概述
 
-浏览器操作 提供方 让模型检查与操作网页。本组拥有独占 提供方 注册。实验性 提供方 提供浏览器工具，并管理各 Session 的浏览器资源。
+浏览器操作 提供方 让模型检查与操作网页。本组拥有独占 提供方 注册，以及操作用户在右侧边栏中看到的浏览器标签页的 Desktop 提供方。实验性 提供方 提供浏览器工具，并管理各 Session 的浏览器资源。
 
 ## 目录
 
@@ -27,6 +27,7 @@ kind: "package-group"
 | 包 | 职责 | ctx 键 |
 |---|---|---|
 | [`browser-use`](browser-use/README.zh.md) | 独占具名 提供方 注册 | `ctx.browserUse` |
+| [`browser-use-desktop`](browser-use-desktop/README.zh.md) | 操作 Desktop 右侧边栏浏览器标签页的智能体工具 | — |
 
 <a id="related-documentation"></a>
 ## 相关文档

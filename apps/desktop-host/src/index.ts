@@ -11,6 +11,8 @@ import type {} from '@deepseek-ai/dsh-host-webserver'
 import type {} from '@deepseek-ai/dsh-deepseek-account'
 import { resolveDshHome } from '@deepseek-ai/dsh-home-paths'
 import * as desktopOffice from './office.ts'
+import * as desktopBrowser from './browser.ts'
+import { createDesktopBrowserChannel } from './browser.ts'
 import { localDragResource } from './file-drag.ts'
 
 import { installDesktopUpdateTaskControl } from './update-tasks.ts'
@@ -57,7 +59,9 @@ async function main(): Promise<void> {
     if (!process.connected || process.send === undefined) { resolve(); return }
     process.send(message, (error) => { if (error === null) resolve(); else reject(error) })
   })
+  const browser = createDesktopBrowserChannel(send)
   const stop = (): Promise<void> => stopping ??= (async () => {
+    browser.close()
     for (const abort of dragReads.values()) abort.abort()
     await Promise.allSettled(dragTasks)
     // Startup failure is reported by main; shutdown only owns a tree that booted.
@@ -72,6 +76,7 @@ async function main(): Promise<void> {
   process.on('message', (message: unknown) => {
     if (typeof message !== 'object' || message === null || !('type' in message)) return
     if (message.type === 'shutdown') { void stop(); return }
+    if (browser.receive(message)) return
     if (message.type === 'file-drag-cancel') {
       if ('requestId' in message && typeof message.requestId === 'number') dragReads.get(message.requestId)?.abort()
       return
@@ -136,6 +141,7 @@ async function main(): Promise<void> {
     source: process.argv[4] ?? join(runtimeDir, '..', 'runtime', 'primary-runtime'),
     root: join(resolveDshHome(), 'dsh-runtimes', 'dsh-primary-runtime'),
   })
+  await ctx.plugin(desktopBrowser, { channel: browser.channel })
   installPlatformSessionPublisher(ctx, (session) => {
     if (process.connected) process.send?.({ type: 'platform-session', session })
   })
