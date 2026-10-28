@@ -139,10 +139,7 @@ jobs:
   # persistent pnpm store and tool caches make them redundant (and saving here
   # would poison the hosted cache namespace with self-hosted paths).
   serial-linux-selfhosted:
-    # Forks have no self-hosted pool; without this guard the job waits in the queue until GitHub expires it.
-    if: >-
-      github.event_name == 'push' && github.ref == 'refs/heads/master'
-      && github.repository == 'deepseek-harness/deepseek-harness'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     name: serial / linux (self-hosted standby)
     runs-on: [self-hosted, linux, x64, vm-backup]
     steps:
@@ -236,10 +233,7 @@ jobs:
   # (and saving here would poison the hosted cache namespace with self-hosted
   # paths).
   serial-windows:
-    # Forks have no self-hosted pool; without this guard the job waits in the queue until GitHub expires it.
-    if: >-
-      github.event_name == 'push' && github.ref == 'refs/heads/master'
-      && github.repository == 'deepseek-harness/deepseek-harness'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     name: serial / windows (self-hosted standby)
     runs-on: [self-hosted, dsh-win-ci, windows]
     timeout-minutes: 120
