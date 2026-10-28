@@ -314,6 +314,43 @@ The [shared runtime lock](scripts/primary-runtime/lock.json) records each distri
 | [`tzdata`](https://github.com/python/tzdata) | 2025.2 | Apache-2.0 |
 | [`xlsxwriter`](https://github.com/jmcnamara/XlsxWriter) | 3.2.9 | BSD-2-Clause |
 
+## Bundled search service
+
+Desktop ships [SearXNG](https://github.com/searxng/searxng) at commit `f4822b3fc46726bb259d14c6332b702c76b98f82`, unmodified, under AGPL-3.0-or-later. It runs as a separate local process that the application reaches over HTTP; its license text ships beside it as `runtime/searxng/LICENSE`, and the source is the locked archive in the [shared runtime lock](scripts/primary-runtime/lock.json). Its Python distributions live in a separate `site-packages` tree:
+
+| Distribution | Locked version | Project license |
+| --- | --- | --- |
+| [`annotated-doc`](https://github.com/fastapi/annotated-doc) | 0.0.5 | MIT |
+| [`babel`](https://github.com/python-babel/babel) | 2.18.0 | BSD-3-Clause |
+| [`blinker`](https://github.com/pallets-eco/blinker) | 1.9.0 | MIT |
+| [`certifi`](https://github.com/certifi/python-certifi) | 2026.7.22 | MPL-2.0 |
+| [`cffi`](https://github.com/python-cffi/cffi) | 2.1.1 | MIT-0 |
+| [`click`](https://github.com/pallets/click) | 8.5.0 | BSD-3-Clause |
+| [`curl-cffi`](https://github.com/lexiforest/curl_cffi) | 0.16.3 | MIT |
+| [`flask`](https://github.com/pallets/flask) | 3.1.3 | BSD-3-Clause |
+| [`flask-babel`](https://github.com/python-babel/flask-babel) | 4.0.0 | BSD-3-Clause |
+| [`isodate`](https://github.com/gweis/isodate) | 0.7.2 | BSD-3-Clause |
+| [`itsdangerous`](https://github.com/pallets/itsdangerous) | 2.2.0 | BSD-3-Clause |
+| [`jinja2`](https://github.com/pallets/jinja) | 3.1.6 | BSD-3-Clause |
+| [`lxml`](https://github.com/lxml/lxml) | 6.1.3 | BSD-3-Clause |
+| [`markdown-it-py`](https://github.com/executablebooks/markdown-it-py) | 4.2.0 | MIT |
+| [`markupsafe`](https://github.com/pallets/markupsafe) | 3.0.4 | BSD-3-Clause |
+| [`mdurl`](https://github.com/executablebooks/mdurl) | 0.1.2 | MIT |
+| [`msgspec`](https://github.com/msgspec/msgspec) | 0.22.0 | BSD-3-Clause |
+| [`pycparser`](https://github.com/eliben/pycparser) | 3.12 | BSD-3-Clause |
+| [`pygments`](https://github.com/pygments/pygments) | 2.21.0 | BSD-2-Clause |
+| [`python-dateutil`](https://github.com/dateutil/dateutil) | 2.9.0.post0 | Apache-2.0 OR BSD-3-Clause |
+| [`pytz`](https://github.com/stub42/pytz) | 2026.5 | MIT |
+| [`pyyaml`](https://github.com/yaml/pyyaml) | 6.0.3 | MIT |
+| [`rich`](https://github.com/Textualize/rich) | 15.0.0 | MIT |
+| [`shellingham`](https://github.com/sarugaku/shellingham) | 1.5.4 | ISC |
+| [`six`](https://github.com/benjaminp/six) | 1.17.0 | MIT |
+| [`typer`](https://github.com/fastapi/typer) | 0.27.2 | MIT |
+| [`typing-extensions`](https://github.com/python/typing_extensions) | 4.16.0 | PSF-2.0 |
+| [`valkey`](https://github.com/valkey-io/valkey-py) | 6.1.1 | MIT |
+| [`werkzeug`](https://github.com/pallets/werkzeug) | 3.1.9 | BSD-3-Clause |
+| [`whitenoise`](https://github.com/evansd/whitenoise) | 6.12.0 | MIT |
+
 ## First-party native packages
 
 `@deepseek-ai/node-addon-system` (and its platform packages) is built and released from this repository under BSD 3-Clause. It is listed here for completeness; it is first-party, not third-party.

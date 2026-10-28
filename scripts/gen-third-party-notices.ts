@@ -119,6 +119,32 @@ const PYTHON_METADATA: Record<string, { license: string; repo: string; role?: st
   'typing-extensions': { license: 'PSF-2.0', repo: 'https://github.com/python/typing_extensions' },
   tzdata: { license: 'Apache-2.0', repo: 'https://github.com/python/tzdata' },
   xlsxwriter: { license: 'BSD-2-Clause', repo: 'https://github.com/jmcnamara/XlsxWriter' },
+  'annotated-doc': { license: 'MIT', repo: 'https://github.com/fastapi/annotated-doc' },
+  'babel': { license: 'BSD-3-Clause', repo: 'https://github.com/python-babel/babel' },
+  'blinker': { license: 'MIT', repo: 'https://github.com/pallets-eco/blinker' },
+  'certifi': { license: 'MPL-2.0', repo: 'https://github.com/certifi/python-certifi' },
+  'cffi': { license: 'MIT-0', repo: 'https://github.com/python-cffi/cffi' },
+  'click': { license: 'BSD-3-Clause', repo: 'https://github.com/pallets/click' },
+  'curl-cffi': { license: 'MIT', repo: 'https://github.com/lexiforest/curl_cffi' },
+  'flask': { license: 'BSD-3-Clause', repo: 'https://github.com/pallets/flask' },
+  'flask-babel': { license: 'BSD-3-Clause', repo: 'https://github.com/python-babel/flask-babel' },
+  'isodate': { license: 'BSD-3-Clause', repo: 'https://github.com/gweis/isodate' },
+  'itsdangerous': { license: 'BSD-3-Clause', repo: 'https://github.com/pallets/itsdangerous' },
+  'jinja2': { license: 'BSD-3-Clause', repo: 'https://github.com/pallets/jinja' },
+  'markdown-it-py': { license: 'MIT', repo: 'https://github.com/executablebooks/markdown-it-py' },
+  'markupsafe': { license: 'BSD-3-Clause', repo: 'https://github.com/pallets/markupsafe' },
+  'mdurl': { license: 'MIT', repo: 'https://github.com/executablebooks/mdurl' },
+  'msgspec': { license: 'BSD-3-Clause', repo: 'https://github.com/msgspec/msgspec' },
+  'pycparser': { license: 'BSD-3-Clause', repo: 'https://github.com/eliben/pycparser' },
+  'pygments': { license: 'BSD-2-Clause', repo: 'https://github.com/pygments/pygments' },
+  'pytz': { license: 'MIT', repo: 'https://github.com/stub42/pytz' },
+  'pyyaml': { license: 'MIT', repo: 'https://github.com/yaml/pyyaml' },
+  'rich': { license: 'MIT', repo: 'https://github.com/Textualize/rich' },
+  'shellingham': { license: 'ISC', repo: 'https://github.com/sarugaku/shellingham' },
+  'typer': { license: 'MIT', repo: 'https://github.com/fastapi/typer' },
+  'valkey': { license: 'MIT', repo: 'https://github.com/valkey-io/valkey-py' },
+  'werkzeug': { license: 'BSD-3-Clause', repo: 'https://github.com/pallets/werkzeug' },
+  'whitenoise': { license: 'MIT', repo: 'https://github.com/evansd/whitenoise' },
 }
 
 type PythonMetadata = typeof PYTHON_METADATA
@@ -771,6 +797,7 @@ export async function render(): Promise<string> {
   const vendored = collectVendored()
   const python = collectPython()
   const bundledPython = collectBundledPythonDependencies(primaryRuntimeLock.pythonPackages)
+  const bundledSearch = collectBundledPythonDependencies(primaryRuntimeLock.searxng.pythonPackages)
   const patched = collectPatched()
   const claudeDistribution = runtimeDeps.some(
     dep => dep.name === CLAUDE_AGENT_SDK_PACKAGE,
@@ -846,6 +873,14 @@ The [shared runtime lock](scripts/primary-runtime/lock.json) records each distri
 | Distribution | Locked version | Project license |
 | --- | --- | --- |
 ${bundledPython.map(dep => `| [\`${dep.name}\`](${dep.repo}) | ${dep.version} | ${dep.license} |`).join('\n')}
+
+## Bundled search service
+
+Desktop ships [SearXNG](https://github.com/searxng/searxng) at commit \`${primaryRuntimeLock.searxng.commit}\`, unmodified, under AGPL-3.0-or-later. It runs as a separate local process that the application reaches over HTTP; its license text ships beside it as \`runtime/searxng/LICENSE\`, and the source is the locked archive in the [shared runtime lock](scripts/primary-runtime/lock.json). Its Python distributions live in a separate \`site-packages\` tree:
+
+| Distribution | Locked version | Project license |
+| --- | --- | --- |
+${bundledSearch.map(dep => `| [\`${dep.name}\`](${dep.repo}) | ${dep.version} | ${dep.license} |`).join('\n')}
 
 ## First-party native packages
 

@@ -3,6 +3,7 @@ import { WINDOWS_TITLEBAR_HEIGHT } from './windows-layout.ts'
 /** Electron shell: desktop project ownership, custom protocol, windows, and lifecycle. */
 
 import { access, readFile, writeFile } from 'node:fs/promises'
+import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import {
@@ -36,6 +37,7 @@ import { desktopUpdateReadyConfirmation, formatDesktopMessage, resolveDesktopLoc
 import { claimDesktopSingleInstance } from './single-instance.ts'
 import { desktopUpdateChannel } from './update-channel.ts'
 import { DesktopUpdateCoordinator } from './update-coordinator.ts'
+import { DesktopSearxng } from './searxng-process.ts'
 import { prepareDesktopUpdateWindow } from './update-window.ts'
 import { DesktopCommandManager } from './command-management.ts'
 import { serveWebDocument, authenticateWebHost, forwardWebRequest } from './web-document.ts'
@@ -376,6 +378,17 @@ async function main(): Promise<void> {
     ? developmentPrimaryRuntime()
     : join(process.resourcesPath, 'runtime', 'primary-runtime')
   const activeProject = paths.profile
+  // The bundled search service runs hidden for the whole application run; a build without its payload searches nothing.
+  const searxngRoot = join(primaryRuntime, '..', 'searxng')
+  const searxng = existsSync(join(searxngRoot, 'searxng.json')) ? new DesktopSearxng({
+    python: join(primaryRuntime, 'dependencies', 'python', ...(process.platform === 'win32' ? ['python.exe'] : ['bin', 'python3'])),
+    root: searxngRoot,
+    dataDirectory: join(app.getPath('userData'), 'searxng'),
+    logFile: join(app.getPath('logs'), 'searxng.log'),
+    environment: process.env,
+  }) : undefined
+  const searxngUrl = await searxng?.start().catch((error: unknown) => { console.error(error); return undefined })
+  app.on('will-quit', () => { void searxng?.stop() })
   const manager = new DesktopProjectManager(paths, resources)
   // Dock and Finder launches inherit only launchd's environment; every Host shares one login-shell read.
   const loginShellRead = new AbortController()
@@ -517,7 +530,10 @@ async function main(): Promise<void> {
   const backend = new DesktopBackendController((onFailure) => {
     const hostInspectPort = developmentHostInspectPort(development)
     const host = new DesktopHostProcess(resources.node, resources.dsh, activeProject,
-      hostInspectPort, { ...hostEnvironment, DSH_CLIENT_VERSION: desktopClientVersion() }, onFailure,
+      hostInspectPort, {
+        ...hostEnvironment, DSH_CLIENT_VERSION: desktopClientVersion(),
+        ...searxngUrl === undefined ? {} : { DSH_SEARXNG_URL: searxngUrl },
+      }, onFailure,
       primaryRuntime,
       resources, (next) => { platformView.setSession(next) }, (record) => {
         operationJournal ??= new OperationJournal(join(app.getPath('userData'), 'plugin-operations'), {

@@ -42,6 +42,8 @@ kind: "package-reference"
 
 ### 运行本地实例
 
+Desktop 无需任何设置：它内置 SearXNG，在后台启动它，并通过 `DSH_SEARXNG_URL` 传入地址（[Desktop 内置网页搜索](../../../apps/desktop/README.zh.md#bundled-web-search)）。其他启动方式需要自己的实例。
+
 官方容器镜像在 8080 端口提供 SearXNG。实例的 `settings.yml` 必须在 `search.formats` 中列出 `json`；否则 SearXNG 返回 HTTP 403，提供方会报告该格式未启用。
 
 ```yaml
@@ -92,7 +94,7 @@ docker run -d --name dsh-searxng --restart unless-stopped -p 127.0.0.1:8888:8080
 
 <a id="known-limitations-and-deferred-work"></a>
 
-- **实例运行在 harness 之外**：harness 既不启动也不监控 SearXNG，实例停止后每次搜索都会失败，直到它重新运行。
+- **在 Desktop 之外，实例运行在 harness 之外**：CLI 与 Web 启动方式既不启动也不监控 SearXNG，实例停止后每次搜索都会失败，直到它重新运行。
 - **上游引擎决定可用性**：SearXNG 会把查询转发给公共搜索引擎，这些引擎可能对其限流或封锁，导致结果变少或为空。
 - **只暴露 `language`**：类别、时间范围与引擎选择保留在实例设置中。
 

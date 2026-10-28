@@ -42,6 +42,8 @@ Mount the provider in a composition that loads the web service; it registers as 
 
 ### Run a local instance
 
+Desktop needs no setup: it bundles SearXNG, starts it in the background, and passes its address as `DSH_SEARXNG_URL` ([Desktop bundled web search](../../../apps/desktop/README.md#bundled-web-search)). Other launches need an instance of their own.
+
 The official container image serves SearXNG on port 8080. The instance's `settings.yml` must list `json` under `search.formats`; otherwise SearXNG answers HTTP 403 and the provider reports that the format is disabled.
 
 ```yaml
@@ -91,7 +93,7 @@ No direct invalidation; the named consumer owns any request-prefix changes.
 
 <a id="known-limitations-and-deferred-work"></a>
 
-- **The instance runs outside the harness**: the harness neither starts nor monitors SearXNG, so a stopped instance fails every search until it runs again.
+- **Outside Desktop, the instance runs outside the harness**: CLI and Web launches neither start nor monitor SearXNG, so a stopped instance fails every search until it runs again.
 - **Upstream engines decide availability**: SearXNG forwards queries to public engines that may rate-limit or block it, which yields fewer or no results.
 - **Only `language` is exposed**: categories, time ranges, and engine selection stay at the instance's settings.
 

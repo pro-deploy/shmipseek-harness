@@ -202,6 +202,79 @@ export interface PreparePrimaryRuntimeOptions {
   readonly skillSource?: string
   /** Omit Node.js and pnpm for carriers providing only Python. */
   readonly pythonOnly?: boolean
+  /** Also prepare the sibling `searxng/` search service payload run by the bundled Python. */
+  readonly searxng?: boolean
+}
+
+/** Facts written to `searxng/searxng.json` for the launcher and smoke checks. */
+export interface SearxngRuntimeManifest {
+  /** Locked SearXNG source version, also frozen into `searx/version_frozen.py`. */
+  readonly version: string
+  /** Locked upstream commit. */
+  readonly commit: string
+  /** Distribution versions unpacked into `site-packages`. */
+  readonly pythonPackages: Readonly<Record<string, string>>
+}
+
+/**
+ * Materialize the locked SearXNG source and its wheels as a separate `site-packages` tree.
+ * The tree stays off the Office interpreter's default import path; its launcher adds it explicitly.
+ * @param target - Runtime target whose native wheels are unpacked.
+ * @param destination - Directory replaced with `site-packages/`, `LICENSE` and `searxng.json`.
+ * @param cache - Verified archive cache.
+ * @returns Resolves after the complete payload has replaced `destination`.
+ */
+export async function prepareSearxngRuntime(target: PrimaryRuntimeTarget, destination: string, cache: string): Promise<void> {
+  const { searxng } = lock
+  const staging = mkdtempSync(join(tmpdir(), 'dsh-searxng-'))
+  try {
+    const source = join(staging, 'source')
+    mkdirSync(source)
+    await extractTar({ file: await downloadPrimaryRuntimeAsset(searxng.url, searxng.sha256, cache), cwd: source, strip: 1,
+      filter: path => /^[^/]+\/(?:searx\/|LICENSE$)/u.test(path) })
+    const output = join(staging, 'payload')
+    const site = join(output, 'site-packages')
+    mkdirSync(site, { recursive: true })
+    renameSync(join(source, 'searx'), join(site, 'searx'))
+    cpSync(join(source, 'LICENSE'), join(output, 'LICENSE'))
+    // Without a frozen version SearXNG runs `git`, which macOS answers with a developer-tools install prompt.
+    const [tag] = searxng.version.split('+')
+    writeFileSync(join(site, 'searx', 'version_frozen.py'), [
+      `VERSION_STRING = ${JSON.stringify(searxng.version)}`, `VERSION_TAG = ${JSON.stringify(searxng.version)}`,
+      `DOCKER_TAG = ${JSON.stringify(`${tag ?? searxng.version}-${searxng.commit.slice(0, 7)}`)}`,
+      'GIT_URL = "https://github.com/searxng/searxng"', 'GIT_BRANCH = "master"', '',
+    ].join('\n'))
+    for (const wheel of [...searxng.targets[target].wheels, ...searxng.wheels]) {
+      await unpackPrimaryRuntimeWheel(await downloadPrimaryRuntimeAsset(wheel.url, wheel.sha256, cache), site)
+    }
+    const manifest: SearxngRuntimeManifest = { version: searxng.version, commit: searxng.commit, pythonPackages: searxng.pythonPackages }
+    writeFileSync(join(output, 'searxng.json'), `${JSON.stringify(manifest, undefined, 2)}\n`)
+    rmSync(destination, { recursive: true, force: true })
+    await cp(output, destination, { recursive: true, verbatimSymlinks: true })
+  } finally {
+    rmSync(staging, { recursive: true, force: true })
+  }
+}
+
+/**
+ * Import the SearXNG application stack with the payload's own interpreter, without starting a server.
+ * @param python - The primary runtime's Python executable.
+ * @param root - Prepared `searxng/` directory.
+ * @param environment - Scrubbed subprocess environment.
+ */
+export function smokeSearxngRuntime(python: string, root: string, environment: NodeJS.ProcessEnv): void {
+  const manifest = JSON.parse(readFileSync(join(root, 'searxng.json'), 'utf8')) as SearxngRuntimeManifest
+  execFileSync(python, ['-I', '-B', '-c', [
+    'import importlib.metadata, json, sys',
+    'sys.path.insert(0, sys.argv[1])',
+    'import flask, curl_cffi, lxml.etree, yaml, msgspec, babel, searx.version',
+    'assert searx.version.VERSION_STRING == sys.argv[2], searx.version.VERSION_STRING',
+    'expected = json.loads(sys.argv[3])',
+    'found = {d.metadata["Name"].lower().replace("_", "-"): d.version for d in importlib.metadata.distributions(path=[sys.argv[1]])}',
+    'missing = {n: v for n, v in expected.items() if found.get(n.lower().replace("_", "-")) != v}',
+    'assert not missing, missing',
+  ].join('\n'), join(root, 'site-packages'), manifest.version, JSON.stringify(manifest.pythonPackages)],
+  { stdio: 'inherit', timeout: 120_000, env: environment })
 }
 
 /**
@@ -262,6 +335,7 @@ export async function preparePrimaryRuntime(options: PreparePrimaryRuntimeOption
   const assets = options.skillSource ?? join(dirname(createRequire(import.meta.url).resolve('@deepseek-ai/dsh-skill-office/package.json')), 'assets')
   await prepareOfficeSkillAssets(assets,
     join(paths.runtime, 'office-skills'))
+  if (options.searxng) await prepareSearxngRuntime(target, join(paths.runtime, 'searxng'), paths.downloads)
 }
 
 /**

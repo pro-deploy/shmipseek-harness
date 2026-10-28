@@ -127,6 +127,12 @@ The [thin-wrapper decision](../../.agents/notes/implemented/architecture/2026-09
 
 Welcome loads the shared Toast palette and shadow tokens, with system typography for body-mounted notifications.
 
+<a id="bundled-web-search"></a>
+
+### Bundled web search
+
+Desktop ships [SearXNG](../../packages/web/web-search-searxng/README.md), a free open-source metasearch engine, in `resources/runtime/searxng` and runs it as a hidden background process for the whole application run; the user installs and starts nothing. Before the Host starts, the main process picks a free loopback port, writes managed settings with a persistent random secret to `searxng/` under Electron userData, and starts the service with the bundled Python, which imports SearXNG from its own `site-packages` tree without changing the Office environment. The Host receives the address as `DSH_SEARXNG_URL`, so the `web_search` tool queries this instance. The service inherits only proxy, locale, and system location variables, writes its output to `searxng.log` in the platform logs directory, restarts after an unexpected exit with delays from one second to one minute, and stops when Desktop quits. Searches issued during the first seconds of startup, or while every upstream engine refuses a query, fail with a structured search error.
+
 <a id="bundled-command-runtime"></a>
 
 ## Bundled command runtime

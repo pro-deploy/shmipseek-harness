@@ -127,6 +127,12 @@ Desktop/SDK 共享运行时构建器在复制或签名产物前，裁剪 NumPy �
 
 Welcome 加载共享 Toast 的配色和阴影变量，挂载在 body 下的通知使用系统字体。
 
+<a id="bundled-web-search"></a>
+
+### 内置网页搜索
+
+Desktop 在 `resources/runtime/searxng` 中内置免费开源元搜索引擎 [SearXNG](../../packages/web/web-search-searxng/README.zh.md)，并在整个应用运行期间将其作为隐藏后台进程运行；用户无需安装或启动任何东西。Host 启动前，主进程选择一个空闲回环端口，把带有持久随机密钥的托管设置写入 Electron userData 下的 `searxng/`，再用内置 Python 启动该服务；Python 从独立的 `site-packages` 树导入 SearXNG，不改变 Office 环境。Host 通过 `DSH_SEARXNG_URL` 获得该地址，因此 `web_search` 工具查询的就是这个实例。该服务只继承代理、区域设置与系统位置变量，把输出写入平台日志目录中的 `searxng.log`，意外退出后以一秒到一分钟的递增延迟重启，并在 Desktop 退出时停止。启动最初几秒内发出的搜索，或在所有上游引擎都拒绝查询时，会以结构化搜索错误失败。
+
 <a id="bundled-command-runtime"></a>
 
 ## 内置命令运行时
