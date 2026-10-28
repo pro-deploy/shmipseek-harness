@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, render } from '@testing-library/react'
 import { SlotRegistry } from '@deepseek-ai/dsh-client-ui-renderer/client'
 import { apply, inject } from '../src/client/index.ts'
-import { OfficialBrandMark, OfficialBrandName } from '../src/client/Brand.tsx'
+import { OfficialBrandMark, OfficialBrandName, OfficialHeroBrandMark } from '../src/client/Brand.tsx'
 import { apply as hostApply } from '../src/index.ts'
 
 afterEach(() => {
@@ -40,11 +40,13 @@ describe('official browser-brand plugin', () => {
     expect(inject).toEqual(['slots'])
   })
 
-  it('leaves every slot empty outside the official build profile', async () => {
-    vi.stubEnv('DSH_CLIENT_BUILD_PROFILE', 'local')
-    const subject = await bench()
-    await subject.ctx.plugin({ inject: [...inject], apply }).await()
-    for (const hole of HOLES) expect(subject.slots.entries(hole)).toHaveLength(0)
+  it('fills the brand slots in every client build profile', async () => {
+    for (const profile of ['local', 'official']) {
+      vi.stubEnv('DSH_CLIENT_BUILD_PROFILE', profile)
+      const subject = await bench()
+      await subject.ctx.plugin({ inject: [...inject], apply }).await()
+      for (const hole of [...HOLES, HERO_HOLE] as const) expect(subject.slots.entries(hole)).toHaveLength(1)
+    }
   })
 
   it('fills declarations before or after apply and removes every occupant on teardown', async () => {
@@ -71,21 +73,15 @@ describe('official browser-brand plugin', () => {
     for (const hole of HOLES) expect(after.slots.entries(hole)).toHaveLength(1)
   })
 
-  it('leaves the conversation hero on its declaring fallback even in official builds', async () => {
-    vi.stubEnv('DSH_CLIENT_BUILD_PROFILE', 'official')
-    const subject = await bench()
-    await subject.ctx.plugin({ inject: [...inject], apply }).await()
-    expect(subject.slots.entries(HERO_HOLE)).toHaveLength(0)
-  })
-
-  it('renders the official name independently from both requested mark sizes', () => {
+  it('renders the brand as text only: no sidebar mark, the wordmark name, and a scaled hero wordmark', () => {
+    expect(render(<OfficialBrandMark size={24} />).container.innerHTML).toBe('')
+    cleanup()
     const name = render(<OfficialBrandName />)
-    expect(name.container.querySelector('svg')?.getAttribute('viewBox')).toBe('26 0 156 24')
-    name.unmount()
-
-    const mark = render(<OfficialBrandMark size={34} />)
-    expect(mark.container.querySelector('svg')?.getAttribute('width')).toBe('34')
-    mark.rerender(<OfficialBrandMark size={24} />)
-    expect(mark.container.querySelector('svg')?.getAttribute('width')).toBe('24')
+    expect(name.container.querySelector('svg')?.getAttribute('viewBox')).toBe('0 0 182 24')
+    expect([...name.container.querySelectorAll('text')].map(node => node.textContent)).toEqual(['ShmipSeek', 'HARNESS'])
+    cleanup()
+    const hero = render(<OfficialHeroBrandMark size={34} className="fish" />)
+    expect(hero.container.querySelector('svg')?.getAttribute('height')).toBe('27')
+    expect(hero.container.querySelector('svg')?.getAttribute('class')).toBe('fish')
   })
 })

@@ -204,14 +204,15 @@ describe('FishLogo', () => {
 })
 
 describe('BrandWordmark', () => {
-  it('can render the name artwork with or without its leading mark', () => {
+  it('renders the text wordmark with its badge, with or without the legacy mark option', () => {
     const view = render(<primitives.BrandWordmark />)
     const svg = view.container.querySelector('svg')!
     expect(svg.getAttribute('width')).toBe('182')
     expect(svg.getAttribute('viewBox')).toBe('0 0 182 24')
+    expect([...svg.querySelectorAll('text')].map(node => node.textContent)).toEqual(['ShmipSeek', 'HARNESS'])
 
-    view.rerender(<primitives.BrandWordmark includeMark={false} />)
-    expect(svg.getAttribute('width')).toBe('156')
-    expect(svg.getAttribute('viewBox')).toBe('26 0 156 24')
+    view.rerender(<primitives.BrandWordmark includeMark={false} size={12} />)
+    expect(svg.getAttribute('width')).toBe('91')
+    expect(svg.getAttribute('viewBox')).toBe('0 0 182 24')
   })
 })
